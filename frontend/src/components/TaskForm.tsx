@@ -169,8 +169,22 @@ export default function TaskForm({ task, onSuccess }: TaskFormProps) {
           }
         }
       } else {
-        // 创建新任务
-        const newTask = await apiService.createTask(formData);
+        // 创建新任务，只包含相关字段
+        const createData: CreateTaskInput = {
+          title: formData.title,
+          description: formData.description,
+          task_type: formData.task_type,
+          priority: formData.priority,
+          quadrant: formData.quadrant,
+          deadline: formData.deadline === '' ? undefined : formData.deadline,
+        };
+        
+        // 只有 slow 类型任务才发送 completion_percentage
+        if (formData.task_type === 'slow') {
+          createData.completion_percentage = formData.completion_percentage;
+        }
+        
+        const newTask = await apiService.createTask(createData);
         
         if (!newTask || !newTask.id) {
           throw new Error('创建任务失败：未返回任务ID');
