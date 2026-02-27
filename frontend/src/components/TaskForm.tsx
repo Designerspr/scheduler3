@@ -113,11 +113,21 @@ export default function TaskForm({ task, onSuccess }: TaskFormProps) {
       
       if (isEdit) {
         taskId = Number(id || task?.id);
-        // 准备更新数据，将空字符串转换为undefined
+        // 准备更新数据，只包含相关字段
         const updateData: UpdateTaskInput = {
-          ...formData,
+          title: formData.title,
+          description: formData.description,
+          task_type: formData.task_type,
+          priority: formData.priority,
+          quadrant: formData.quadrant,
           deadline: formData.deadline === '' ? undefined : formData.deadline,
         };
+        
+        // 只有 slow 类型任务才发送 completion_percentage
+        if (formData.task_type === 'slow') {
+          updateData.completion_percentage = formData.completion_percentage;
+        }
+        
         await apiService.updateTask(taskId, updateData);
         
         // 如果是周期任务，更新或创建周期任务配置
